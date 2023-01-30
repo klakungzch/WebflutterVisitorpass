@@ -123,8 +123,13 @@ class Word{
   var dialogEditNewsHeader1 = {'TH':'ยืนยันการแก้ไขข้อมูลข่าว','EN':'Confirm correction of news information.'};
   var dialogEditNewsDetail1_1 = {'TH':'ต้องการแก้ไขข้อมูลข่าว','EN':'Do you want to correct'};
   var dialogEditNewsDetail1_2 = {'TH':' หรือไม่?','EN':'?'};
+  var choosenews = {'TH':'เลือกรูป...','EN':'Choose image...'};
+  var clearimage = {'TH':'ลบรูปทั้งหมด','EN':'Clear'};
   /************************Edit News**************************/
   var editNewsHeader = {'TH':'แก้ไขข้อมูลข่าว','EN':'Edit News'};
+
+  /************************Dialog News**************************/
+  var dialogAddnewsHeader1 = {'TH':'กรุณาเพิ่มรูปไม่เกิน 3 รูป','EN':'Please fill image.'};
 
   /************************Choose News**************************/
   var chooseNewsHeader = {'TH':'เลือกข่าว','EN':'Choose News'};

@@ -39,7 +39,7 @@ Widget textFieldnews(BuildContext context, TextEditingController controller, Ico
       inputFormatters: <TextInputFormatter>[
         FilteringTextInputFormatter.singleLineFormatter
       ],
-      maxLength: 30,
+      maxLength: 255,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: icon,

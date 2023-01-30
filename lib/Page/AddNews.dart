@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:file_picker/file_picker.dart';
@@ -8,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart' as  firebase_storage;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visitorguard/Language/UrlImage.dart';
@@ -54,22 +56,39 @@ class _AddNewsState extends State<AddNews> {
     super.initState();
   }*/
   final Future<FirebaseApp> _initialization  = Firebase.initializeApp();
-  String imageUrl;
-  String defaultImageUrl ="https://learn.g2.com/hubfs/What_is_Information_Technology.jpg";
+  List<String> imageUrls = [];
+  String defaultImageUrl ="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQv_OkZlKYDhVdfNIQ5-VURqB3TyNrIBxQqcSSMwm7P7IdQZFgvXq05r1YmG9rr-XJLPf0&usqp=CAU";
   String selectFile = "";
-  File file;
+  XFile file;
   String path = "";
   Uint8List selectedImageInBytes;
-  FilePickerResult fileResult;
+  List<Uint8List> selectedImageList = [];
+  int itemcount  = 0;
+  bool isItemSaved = false;
 
   _selectFile () async{
-    fileResult = await FilePicker.platform.pickFiles();
+    FilePickerResult fileResult = await FilePicker.platform.pickFiles();
 
     if(fileResult != null){
       setState(()  {
         selectFile = fileResult.files.first.name;
         selectedImageInBytes = fileResult.files.first.bytes;
       });
+    }
+    print(selectFile);
+  }
+  _selectFilemultiple () async{
+    FilePickerResult fileResult = await FilePicker.platform.pickFiles(allowMultiple: true);
+
+    if(fileResult != null && fileResult.files.length < 4){
+      selectFile = fileResult.files.first.name;
+      fileResult.files.forEach((element) {
+        setState(()  {
+          selectedImageList.add(element.bytes);
+          itemcount += 1;
+        });
+      });
+
     }
     print(selectFile);
   }
@@ -97,6 +116,39 @@ class _AddNewsState extends State<AddNews> {
       print(e);
     }
   }
+
+
+   Future<String> _uploadMultipleFiles(String itemName) async {
+    String imageUrl = '';
+    try {
+      for (var i = 0; i < itemcount; i++) {
+        firebase_storage.UploadTask uploadTask;
+
+        final ref = firebase_storage
+            .FirebaseStorage.instance
+            .ref()
+            .child('news')
+            .child('/' + itemName + '/' + i.toString());
+
+        final metadata =
+        firebase_storage.SettableMetadata(contentType: 'image/png');
+
+        //uploadTask = ref.putFile(File(file.path));
+        uploadTask = ref.putData(selectedImageList[i], metadata);
+
+        await uploadTask.whenComplete(() => null);
+        imageUrl = await ref.getDownloadURL();
+        setState(() {
+          imageUrls.add(imageUrl);
+          print ('Uploaded Image URL '+imageUrl);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+    return imageUrl;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -199,6 +251,7 @@ class _AddNewsState extends State<AddNews> {
                       child :Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+
                           Container(
                             child: Row(
                               children: [
@@ -227,6 +280,39 @@ class _AddNewsState extends State<AddNews> {
                             ),
                           ),
                           SizedBox(height: 15),
+                          Container(
+                            child:  selectFile.isEmpty
+                                ? Image.network(
+                              defaultImageUrl,
+                              fit: BoxFit.cover,
+                            )
+                            // Image.asset('assets/create_menu_default.png')
+                                : Container(height: MediaQuery.of(context).size.height * 0.45,
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  15,
+                                ),
+                              ),
+                              child: CarouselSlider(
+                                options: CarouselOptions(height: 400.0,viewportFraction: 1.0,
+                                    enlargeCenterPage: false),
+                                items: selectedImageList.map((i) {
+                                  return Builder(
+                                    builder: (BuildContext context) {
+                                      return Container(
+                                        width: MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                        child: Image.memory(i),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 15),
                           textFieldnews(context, news_name, Icon(Icons.newspaper), '${word.newsName['$lang']}', false),
                           SizedBox(height: 15),
                           Container(
@@ -249,29 +335,37 @@ class _AddNewsState extends State<AddNews> {
                               ),
                             ),
                           ),
+
                           SizedBox(height: 15),
-                          Column(
-                            children: [selectFile.isEmpty ?
-                            Container(
-                                  height: 250,
-                                    width: 500,
-                                    child: Image.network(defaultImageUrl,fit: BoxFit.contain)):
-                            Image.memory(selectedImageInBytes,width: 500,height: 250,),
-                            ],
+                          ElevatedButton(
+                            onPressed: ()  {
+                              //_selectFile();
+                              _selectFilemultiple();
+                            },
+                            child: Text('${word.choosenews['$lang']}'),
                           ),
                           SizedBox(height: 15),
                           ElevatedButton(
                             onPressed: ()  {
-                              _selectFile();
-
+                              setState(()   {
+                                selectedImageList.clear();
+                               /* Uint8List bytes = (await NetworkAssetBundle(Uri.parse(defaultImageUrl))
+                                    .load(defaultImageUrl))
+                                    .buffer
+                                    .asUint8List();
+                                selectedImageList.add(bytes); */
+                                print('You Clear image');
+                              });
                             },
-                            child: Text("Upload"),
+                            child: Text('${word.clearimage['$lang']}'),
                           ),
                           SizedBox(height: 15),
                           ElevatedButton(
                             onPressed: () async {
                               if(news_name.text.isEmpty || news_detail.text.isEmpty ){
                                 dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);
+                              }else if(selectedImageList == []  || selectedImageList.isEmpty){
+                                dialogCustom(context, '${word.dialogAddnewsHeader1['$lang']}', this.lang);
                               }
                               else{
                                 var model;
@@ -280,9 +374,9 @@ class _AddNewsState extends State<AddNews> {
                                 String username = prefs.getString("userlogin");
                                 String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
 
-                                FirebaseFirestore.instance.collection("News").get().then((querySnapshot) {
+                                FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
                                   int count = 1;
-                                  var maxId = 1;
+                                  var maxId = 0;
                                   querySnapshot.docs.forEach((document) {
                                     var currentValue = document.data()['id'] as double;
                                     if (document.data() != "") {
@@ -293,21 +387,26 @@ class _AddNewsState extends State<AddNews> {
                                     }
                                   });
                                   print(count);
-
-                                  var NewsModel = {
+                                  int mid = maxId +1;
+                                  await _uploadMultipleFiles(mid.toString());
+                                  var NewsModel2 = {
                                     "id": maxId+1,
                                     "username": username,
                                     "title" : news_name.text,
                                     "detail" : news_detail.text,
-                                    "datetime" : date
+                                    "datetime" : date,
+                                    "imageurl" : imageUrls
 
                                   };
                                   FirebaseFirestore.instance
                                       .collection("News")
                                       .doc((maxId+1).toString())
-                                      .set(NewsModel);
+                                      .set(NewsModel2);
 
-                                  _uploadFile(maxId+1);
+                                  //_uploadFile(maxId+1);
+
+
+                                  //saveItem();
                                 });
 
 

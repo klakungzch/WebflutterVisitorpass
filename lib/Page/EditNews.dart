@@ -1,10 +1,17 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visitorguard/Language/UrlImage.dart';
 import 'package:visitorguard/Language/Word.dart';
 import 'package:visitorguard/Model/condo_model.dart';
 import 'package:visitorguard/Page/CondoManagement.dart';
+
+import 'package:firebase_storage/firebase_storage.dart' as  firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:visitorguard/Page/Log.dart';
 import 'package:visitorguard/Widgets/ColorSet.dart';
 import 'package:visitorguard/Widgets/Margin.dart';
@@ -36,6 +43,63 @@ class _EditNewsState extends State<EditNews> {
   var url = new UrlImage();
   var colorset = new ColorSet();
   CollectionReference news = FirebaseFirestore.instance.collection('News');
+  List<String> imageUrls = [];
+  String defaultImageUrl ="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQv_OkZlKYDhVdfNIQ5-VURqB3TyNrIBxQqcSSMwm7P7IdQZFgvXq05r1YmG9rr-XJLPf0&usqp=CAU";
+  String selectFile = "";
+  XFile file;
+  String path = "";
+  Uint8List selectedImageInBytes;
+  List<Uint8List> selectedImageList = [];
+  int itemcount  = 0;
+  bool isItemSaved = false;
+
+  _selectFilemultiple () async{
+    FilePickerResult fileResult = await FilePicker.platform.pickFiles(allowMultiple: true);
+
+    if(fileResult != null && fileResult.files.length < 4){
+      selectFile = fileResult.files.first.name;
+      fileResult.files.forEach((element) {
+        setState(()  {
+          selectedImageList.add(element.bytes);
+          itemcount += 1;
+        });
+      });
+
+    }
+    print(selectFile);
+  }
+
+  Future<String> _uploadMultipleFiles(String itemName) async {
+    String imageUrl = '';
+    try {
+      for (var i = 0; i < itemcount; i++) {
+        firebase_storage.UploadTask uploadTask;
+
+        final ref = firebase_storage
+            .FirebaseStorage.instance
+            .ref()
+            .child('news')
+            .child('/' + itemName + '/' + i.toString());
+
+        final metadata =
+        firebase_storage.SettableMetadata(contentType: 'image/png');
+
+        //uploadTask = ref.putFile(File(file.path));
+        uploadTask = ref.putData(selectedImageList[i], metadata);
+
+        await uploadTask.whenComplete(() => null);
+        imageUrl = await ref.getDownloadURL();
+        setState(() {
+          imageUrls.add(imageUrl);
+          print ('Uploaded Image URL '+imageUrl);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+    return imageUrl;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +108,8 @@ class _EditNewsState extends State<EditNews> {
     screenHeight = size.height;
     var title = new TextEditingController();
     var news_detail = new TextEditingController();
+
+
 
     return Scaffold(
       appBar: AppBar(
@@ -136,6 +202,9 @@ class _EditNewsState extends State<EditNews> {
           }
           title.text = snapshot.data['title'];
           news_detail.text = snapshot.data['detail'];
+          List<dynamic> uriimage = snapshot.data['imageurl'];
+          print(uriimage[0]);
+
           return SingleChildScrollView(
             child: Center(
               child: Container(
@@ -146,11 +215,81 @@ class _EditNewsState extends State<EditNews> {
                   children: [
                     topUserEdit(context, '${word.editNewsHeader['$lang']} : ${snapshot.data['title']}'),
                     SizedBox(height: 15),
+                    Container(
+                      child:  selectFile.isEmpty
+                          ? CarouselSlider(
+                        options: CarouselOptions(height: 400.0,viewportFraction: 1.0,
+                            enlargeCenterPage: false),
+                        items: uriimage.map((i) {
+                          return Builder(
+                            builder: (BuildContext context) {
+                              return Container(
+                                width: MediaQuery.of(context).size.width,
+                                margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Image.network(i),
+                              );
+                            },
+                          );
+                        }).toList(),
+                      )
+                      // Image.asset('assets/create_menu_default.png')
+                          : Container(height: MediaQuery.of(context).size.height * 0.45,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            15,
+                          ),
+                        ),
+                        child: CarouselSlider(
+                          options: CarouselOptions(height: 400.0,viewportFraction: 1.0,
+                              enlargeCenterPage: false,reverse: false,
+                            autoPlay: true,
+                            autoPlayInterval: Duration(seconds: 3),
+                            autoPlayAnimationDuration: Duration(milliseconds: 800),
+                            autoPlayCurve: Curves.fastOutSlowIn),
+                          items: selectedImageList.map((i) {
+                            return Builder(
+                              builder: (BuildContext context) {
+                                return Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                  child: Image.memory(i),
+                                );
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 15),
                     textFieldnews(context, title, Icon(Icons.newspaper), '${word.newsName['$lang']}', false),
                     margin(context),
                     textFieldnewsDetail(context, news_detail, Icon(Icons.newspaper), '${word.newDetail['$lang']}', false),
                     SizedBox(height: 15),
                     margin(context),
+                    ElevatedButton(
+                      onPressed: ()  {
+                        //_selectFile();
+                        _selectFilemultiple();
+                      },
+                      child: Text('${word.choosenews['$lang']}'),
+                    ),
+                   /* SizedBox(height: 15),
+                    ElevatedButton(
+                      onPressed: ()  {
+                        setState(()   {
+                          selectedImageList.clear();
+                          /* Uint8List bytes = (await NetworkAssetBundle(Uri.parse(defaultImageUrl))
+                                    .load(defaultImageUrl))
+                                    .buffer
+                                    .asUint8List();
+                                selectedImageList.add(bytes); */
+                          print('You Clear image');
+                        });
+                      },
+                      child: Text("Clear"),
+                    ),*/
                     SizedBox(height: 15),
                     ElevatedButton(
                       onPressed: () async {
@@ -196,7 +335,7 @@ class _EditNewsState extends State<EditNews> {
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.only(right: 16, left: 16),
-                                        child: Text('${word.dialogEditNewsDetail1_1['$lang']} ${snapshot.data['title']}${word.dialogEditNewsDetail1_2['$lang']}', style: TextStyle(color: Colors.white, fontFamily: 'Prompt'), textAlign: TextAlign.center),
+                                        child: Text('${word.dialogEditNewsDetail1_1['$lang']}', style: TextStyle(color: Colors.white, fontFamily: 'Prompt'), textAlign: TextAlign.center),
                                       ),
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -214,16 +353,72 @@ class _EditNewsState extends State<EditNews> {
                                           SizedBox(width: 10,),
                                           ElevatedButton(
                                             onPressed: () async {
-                                              print('id : ${this.id}');
-                                              var model;
-                                              final DateTime now = DateTime.now();
+                                              if(title.text.isEmpty || news_detail.text.isEmpty ){
+                                                dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);
+                                              }else if(selectedImageList == []  || selectedImageList.isEmpty){
+                                                print('id : ${this.id}');
+                                                var model;
+                                                final DateTime now = DateTime.now();
+                                                final prefs = await SharedPreferences.getInstance();
+                                                String username = prefs.getString("userlogin");
+                                                String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
 
-                                              String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
 
-                                                model = NewsModel.updateNews(this.id,title.text,news_detail.text,date);
-                                              await model.updateNews();
+                                                FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
+                                                  await _uploadMultipleFiles(this.id);
+                                                  var NewsModel2 = {
+                                                    "id": this.id,
+                                                    "username": username,
+                                                    "title" : title.text,
+                                                    "detail" : news_detail.text,
+                                                    "datetime" : date,
+                                                    "imageurl" : uriimage
+
+                                                  };
+                                                  FirebaseFirestore.instance
+                                                      .collection("News")
+                                                      .doc((this.id).toString())
+                                                      .set(NewsModel2);
+                                                });
+                                                Navigator.push(context,  MaterialPageRoute(builder: (context) => NewsManagement(null, this.lang)));
+
+                                              }
+                                              else{
+                                                print('id : ${this.id}');
+                                                var model;
+                                                final DateTime now = DateTime.now();
+                                                final prefs = await SharedPreferences.getInstance();
+                                                String username = prefs.getString("userlogin");
+                                                String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
+
+
+                                                FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
+                                                  await _uploadMultipleFiles(this.id);
+                                                  var NewsModel2 = {
+                                                    "id": this.id,
+                                                    "username": username,
+                                                    "title" : title.text,
+                                                    "detail" : news_detail.text,
+                                                    "datetime" : date,
+                                                    "imageurl" : imageUrls
+
+                                                  };
+                                                  FirebaseFirestore.instance
+                                                      .collection("News")
+                                                      .doc((this.id).toString())
+                                                      .set(NewsModel2);
+
+                                                  //_uploadFile(maxId+1);
+
+
+                                                  //saveItem();
+                                                });
+
+
+
                                               Navigator.push(context,  MaterialPageRoute(builder: (context) => NewsManagement(null, this.lang)));
-                                            }, 
+                                              }
+                                              },
                                             child: Text('${word.ok['$lang']}'), 
                                             style: TextButton.styleFrom(
                                               primary: Colors.yellow[700],
