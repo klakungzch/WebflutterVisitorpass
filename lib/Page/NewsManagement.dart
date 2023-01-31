@@ -420,7 +420,7 @@ class _NewsManagementState extends State<NewsManagement> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(right: 16, left: 16),
-                                child: Text('${word.dialogNewsDetail1_1['$lang']} ${document['title']}${word.dialogNewsDetail1_2['$lang']}', style: TextStyle(color: Colors.white, fontFamily: 'Prompt'), textAlign: TextAlign.center,),
+                                child: Text('${word.dialogNewsDetail1_1['$lang']}', style: TextStyle(color: Colors.white, fontFamily: 'Prompt'), textAlign: TextAlign.center,),
                               ),
                               Row(
                                 mainAxisSize: MainAxisSize.min,

@@ -363,11 +363,10 @@ class _EditNewsState extends State<EditNews> {
                                                 String username = prefs.getString("userlogin");
                                                 String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
 
-
                                                 FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
                                                   await _uploadMultipleFiles(this.id);
                                                   var NewsModel2 = {
-                                                    "id": this.id,
+                                                    "id": int.parse(this.id),
                                                     "username": username,
                                                     "title" : title.text,
                                                     "detail" : news_detail.text,

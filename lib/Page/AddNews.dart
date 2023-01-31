@@ -376,9 +376,10 @@ class _AddNewsState extends State<AddNews> {
 
                                 FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
                                   int count = 1;
-                                  var maxId = 0;
+                                  int maxId = 0;
                                   querySnapshot.docs.forEach((document) {
-                                    var currentValue = document.data()['id'] as double;
+                                    var currentValue = document.data()['id'] as int  ;
+
                                     if (document.data() != "") {
                                       count += 1;
                                     }
@@ -390,7 +391,7 @@ class _AddNewsState extends State<AddNews> {
                                   int mid = maxId +1;
                                   await _uploadMultipleFiles(mid.toString());
                                   var NewsModel2 = {
-                                    "id": maxId+1,
+                                    "id": (maxId+1),
                                     "username": username,
                                     "title" : news_name.text,
                                     "detail" : news_detail.text,
