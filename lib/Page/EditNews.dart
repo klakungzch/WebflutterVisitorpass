@@ -52,7 +52,11 @@ class _EditNewsState extends State<EditNews> {
   List<Uint8List> selectedImageList = [];
   int itemcount  = 0;
   bool isItemSaved = false;
-
+  var title = new TextEditingController();
+  var news_detail = new TextEditingController();
+  String tilestr ="";
+  String news_detailstr = "";
+  bool status = false;
   _selectFilemultiple () async{
     FilePickerResult fileResult = await FilePicker.platform.pickFiles(allowMultiple: true);
 
@@ -62,6 +66,9 @@ class _EditNewsState extends State<EditNews> {
         setState(()  {
           selectedImageList.add(element.bytes);
           itemcount += 1;
+          tilestr = title.text;
+          news_detailstr = news_detail.text;
+          status =true ;
         });
       });
 
@@ -106,8 +113,6 @@ class _EditNewsState extends State<EditNews> {
     Size size = MediaQuery.of(context).size;
     screenWidth = size.width;
     screenHeight = size.height;
-    var title = new TextEditingController();
-    var news_detail = new TextEditingController();
 
 
 
@@ -200,8 +205,15 @@ class _EditNewsState extends State<EditNews> {
               child: CircularProgressIndicator(),
             );
           }
-          title.text = snapshot.data['title'];
-          news_detail.text = snapshot.data['detail'];
+          if (status == true){
+            title.text = tilestr;
+            news_detail.text = news_detailstr;
+
+          }else{
+            title.text = snapshot.data['title'];
+            news_detail.text = snapshot.data['detail'];
+          }
+
           List<dynamic> uriimage = snapshot.data['imageurl'];
           print(uriimage[0]);
 
