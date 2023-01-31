@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:visitorguard/Language/UrlImage.dart';
 import 'package:visitorguard/Language/Word.dart';
 import 'package:visitorguard/Model/condo_model.dart';
@@ -57,6 +58,10 @@ class _EditNewsState extends State<EditNews> {
   String tilestr ="";
   String news_detailstr = "";
   bool status = false;
+  int Actionindex = 0;
+  CarouselController buttonCarouselController = CarouselController();
+  bool isLoading = false;
+
   _selectFilemultiple () async{
     FilePickerResult fileResult = await FilePicker.platform.pickFiles(allowMultiple: true);
 
@@ -64,14 +69,20 @@ class _EditNewsState extends State<EditNews> {
       selectFile = fileResult.files.first.name;
       fileResult.files.forEach((element) {
         setState(()  {
-          selectedImageList.add(element.bytes);
-          itemcount += 1;
-          tilestr = title.text;
-          news_detailstr = news_detail.text;
-          status =true ;
+          if(selectedImageList.length < 3){
+            selectedImageList.add(element.bytes);
+            itemcount += 1;
+            tilestr = title.text;
+            news_detailstr = news_detail.text;
+            status =true ;
+          }else{
+            dialogCustom(context, '${word.dialogAddnewsHeader1['$lang']}', this.lang);
+          }
         });
       });
 
+    }else{
+      dialogCustom(context, '${word.dialogAddnewsHeader1['$lang']}', this.lang);
     }
     print(selectFile);
   }
@@ -113,9 +124,6 @@ class _EditNewsState extends State<EditNews> {
     Size size = MediaQuery.of(context).size;
     screenWidth = size.width;
     screenHeight = size.height;
-
-
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -215,7 +223,6 @@ class _EditNewsState extends State<EditNews> {
           }
 
           List<dynamic> uriimage = snapshot.data['imageurl'];
-          print(uriimage[0]);
 
           return SingleChildScrollView(
             child: Center(
@@ -229,36 +236,53 @@ class _EditNewsState extends State<EditNews> {
                     SizedBox(height: 15),
                     Container(
                       child:  selectFile.isEmpty
-                          ? CarouselSlider(
-                        options: CarouselOptions(height: 400.0,viewportFraction: 1.0,
-                            enlargeCenterPage: false),
+                          ?
+                      CarouselSlider(
                         items: uriimage.map((i) {
                           return Builder(
                             builder: (BuildContext context) {
                               return Container(
                                 width: MediaQuery.of(context).size.width,
                                 margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                child: Image.network(i),
+                                child: Image.network(i) ,
                               );
                             },
                           );
                         }).toList(),
-                      )
-                      // Image.asset('assets/create_menu_default.png')
-                          : Container(height: MediaQuery.of(context).size.height * 0.45,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                            15,
-                          ),
+                        options: CarouselOptions(
+                          height: 400.0,
+                          autoPlay: true,
+                            pageSnapping: false,
+                            enableInfiniteScroll: false,
+                            enlargeCenterPage: true,
+                            autoPlayInterval: Duration(seconds: 2),
+                            initialPage: 0,
+                         /* onPageChanged: (index,reason) {
+                            setState(() {
+                              Actionindex = index;
+                            });
+                          },*/
                         ),
-                        child: CarouselSlider(
-                          options: CarouselOptions(height: 400.0,viewportFraction: 1.0,
-                              enlargeCenterPage: false,reverse: false,
-                            autoPlay: true,
-                            autoPlayInterval: Duration(seconds: 3),
-                            autoPlayAnimationDuration: Duration(milliseconds: 800),
-                            autoPlayCurve: Curves.fastOutSlowIn),
+                      )
+
+                      // Image.asset('assets/create_menu_default.png')
+                          : CarouselSlider(
+                            carouselController: buttonCarouselController,
+                            options: CarouselOptions(
+                              height: 400.0,
+                              pageSnapping: false,
+                              autoPlay: true,
+                              enableInfiniteScroll: false,
+                              enlargeCenterPage: true,
+                              autoPlayInterval: Duration(seconds: 2),
+                              initialPage: 0,
+                             /* onPageChanged: (index,reason) {
+                                setState(() {
+                                  Actionindex = index;
+                                });
+
+                              },*/
+                            ),
                           items: selectedImageList.map((i) {
                             return Builder(
                               builder: (BuildContext context) {
@@ -271,7 +295,6 @@ class _EditNewsState extends State<EditNews> {
                             );
                           }).toList(),
                         ),
-                      ),
                     ),
 
                     SizedBox(height: 15),
@@ -287,21 +310,6 @@ class _EditNewsState extends State<EditNews> {
                       },
                       child: Text('${word.choosenews['$lang']}'),
                     ),
-                   /* SizedBox(height: 15),
-                    ElevatedButton(
-                      onPressed: ()  {
-                        setState(()   {
-                          selectedImageList.clear();
-                          /* Uint8List bytes = (await NetworkAssetBundle(Uri.parse(defaultImageUrl))
-                                    .load(defaultImageUrl))
-                                    .buffer
-                                    .asUint8List();
-                                selectedImageList.add(bytes); */
-                          print('You Clear image');
-                        });
-                      },
-                      child: Text("Clear"),
-                    ),*/
                     SizedBox(height: 15),
                     ElevatedButton(
                       onPressed: () async {
@@ -406,7 +414,7 @@ class _EditNewsState extends State<EditNews> {
                                                 FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
                                                   await _uploadMultipleFiles(this.id);
                                                   var NewsModel2 = {
-                                                    "id": this.id,
+                                                    "id": int.parse(this.id),
                                                     "username": username,
                                                     "title" : title.text,
                                                     "detail" : news_detail.text,

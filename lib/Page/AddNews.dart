@@ -45,16 +45,10 @@ class _AddNewsState extends State<AddNews> {
   double screenWidth, screenHeight;
   var news_name = new TextEditingController();
   var news_detail= new TextEditingController();
-  /* var userName ;
-  CollectionReference users = FirebaseFirestore.instance.collection('UserGuard');
+  var word = new Word();
+  var url = new UrlImage();
+  var colorset = new ColorSet();
 
-  @override
-  void initState() {
-    users.doc(this.id).get().then((value) {
-      userName = value.data()['username'];
-    });
-    super.initState();
-  }*/
   final Future<FirebaseApp> _initialization  = Firebase.initializeApp();
   List<String> imageUrls = [];
   String defaultImageUrl ="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQv_OkZlKYDhVdfNIQ5-VURqB3TyNrIBxQqcSSMwm7P7IdQZFgvXq05r1YmG9rr-XJLPf0&usqp=CAU";
@@ -84,11 +78,18 @@ class _AddNewsState extends State<AddNews> {
       selectFile = fileResult.files.first.name;
       fileResult.files.forEach((element) {
         setState(()  {
-          selectedImageList.add(element.bytes);
-          itemcount += 1;
+          if(selectedImageList.length < 3){
+            selectedImageList.add(element.bytes);
+            itemcount += 1;
+          }else{
+            dialogCustom(context, '${word.dialogAddnewsHeader1['$lang']}', this.lang);
+          }
+
         });
       });
 
+    }else{
+      dialogCustom(context, '${word.dialogAddnewsHeader1['$lang']}', this.lang);
     }
     print(selectFile);
   }
@@ -155,9 +156,6 @@ class _AddNewsState extends State<AddNews> {
     Size size = MediaQuery.of(context).size;
     screenWidth = size.width;
     screenHeight = size.height;
-    var word = new Word();
-    var url = new UrlImage();
-    var colorset = new ColorSet();
 
     return _initialization ==null ? Container():  FutureBuilder(
         future: _initialization,
@@ -287,16 +285,22 @@ class _AddNewsState extends State<AddNews> {
                               fit: BoxFit.cover,
                             )
                             // Image.asset('assets/create_menu_default.png')
-                                : Container(height: MediaQuery.of(context).size.height * 0.45,
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  15,
+                                :CarouselSlider(
+                                options: CarouselOptiosns(
+                                  height: 400.0,
+                                  pageSnapping: false,
+                                  autoPlay: true,
+                                  enableInfiniteScroll: false,
+                                  enlargeCenterPage: true,
+                                  autoPlayInterval: Duration(seconds: 2),
+                                  initialPage: 0,
+                                  /* onPageChanged: (index,reason) {
+                                setState(() {
+                                  Actionindex = index;
+                                });
+
+                              },*/
                                 ),
-                              ),
-                              child: CarouselSlider(
-                                options: CarouselOptions(height: 400.0,viewportFraction: 1.0,
-                                    enlargeCenterPage: false),
                                 items: selectedImageList.map((i) {
                                   return Builder(
                                     builder: (BuildContext context) {
@@ -309,7 +313,7 @@ class _AddNewsState extends State<AddNews> {
                                   );
                                 }).toList(),
                               ),
-                            ),
+
                           ),
 
                           SizedBox(height: 15),

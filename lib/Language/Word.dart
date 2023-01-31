@@ -129,7 +129,7 @@ class Word{
   var editNewsHeader = {'TH':'แก้ไขข้อมูลข่าว','EN':'Edit News'};
 
   /************************Dialog News**************************/
-  var dialogAddnewsHeader1 = {'TH':'กรุณาเพิ่มรูปไม่เกิน 3 รูป','EN':'Please fill image.'};
+  var dialogAddnewsHeader1 = {'TH':'กรุณาเพิ่มรูปไม่เกิน 3 รูป','EN':'Add 1 to 3 images.'};
 
   /************************Choose News**************************/
   var chooseNewsHeader = {'TH':'เลือกข่าว','EN':'Choose News'};
