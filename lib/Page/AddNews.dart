@@ -286,7 +286,7 @@ class _AddNewsState extends State<AddNews> {
                             )
                             // Image.asset('assets/create_menu_default.png')
                                 :CarouselSlider(
-                                options: CarouselOptiosns(
+                                options: CarouselOptions(
                                   height: 400.0,
                                   pageSnapping: false,
                                   autoPlay: true,
