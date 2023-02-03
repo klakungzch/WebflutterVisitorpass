@@ -149,7 +149,7 @@ class _AddNewsState extends State<AddNews> {
     }
     return imageUrl;
   }
-
+  
 
   @override
   Widget build(BuildContext context) {
@@ -366,7 +366,7 @@ class _AddNewsState extends State<AddNews> {
                           SizedBox(height: 15),
                           ElevatedButton(
                             onPressed: () async {
-                              if(news_name.text.isEmpty || news_detail.text.isEmpty ){
+                              if(news_name.text.isEmpty || news_detail.text.isEmpty || news_name.text == "" || news_name.text == " "){
                                 dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);
                               }else if(selectedImageList == []  || selectedImageList.isEmpty){
                                 dialogCustom(context, '${word.dialogAddnewsHeader1['$lang']}', this.lang);

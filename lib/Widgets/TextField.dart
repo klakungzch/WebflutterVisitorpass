@@ -37,7 +37,7 @@ Widget textFieldnews(BuildContext context, TextEditingController controller, Ico
       textAlign: TextAlign.left,
       style: TextStyle(fontSize: 16),
       inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.singleLineFormatter
+        FilteringTextInputFormatter.deny(RegExp(r'^\s'))
       ],
       maxLength: 255,
       decoration: InputDecoration(

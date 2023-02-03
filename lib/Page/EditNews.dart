@@ -373,7 +373,7 @@ class _EditNewsState extends State<EditNews> {
                                           SizedBox(width: 10,),
                                           ElevatedButton(
                                             onPressed: () async {
-                                              if(title.text.isEmpty || news_detail.text.isEmpty ){
+                                              if(title.text.isEmpty || news_detail.text.isEmpty || title.text == "" || title.text == " "){
                                                 dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);
                                               }else if(selectedImageList == []  || selectedImageList.isEmpty){
                                                 print('id : ${this.id}');
