@@ -389,17 +389,13 @@ class _EditNewsState extends State<EditNews> {
                                           ElevatedButton(
 
                                             onPressed: () async {
-                                              QuerySnapshot querybyid = await FirebaseFirestore.instance
-                                                  .collection("News")
-                                                  .where('id'.toLowerCase(), isEqualTo: int.parse(this.id))
-                                                  .get();
-
+                                             /*
                                               QuerySnapshot query = await FirebaseFirestore.instance
                                                   .collection("News")
                                                   .where('title'.toLowerCase(), isEqualTo: title.text.toLowerCase())
                                                   .get();
                                               print(query.docs.isNotEmpty);
-
+*/
                                               if(title.text.isEmpty || news_detail.text.isEmpty || title.text == "" || title.text == " "){
                                                 dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);
                                               }else if(selectedImageList == []  || selectedImageList.isEmpty){
