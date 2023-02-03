@@ -127,7 +127,8 @@ class Word{
   var clearimage = {'TH':'ลบรูปทั้งหมด','EN':'Clear'};
   /************************Edit News**************************/
   var editNewsHeader = {'TH':'แก้ไขข้อมูลข่าว','EN':'Edit News'};
-
+  var editNews = {'TH':'แก้ไขข้อมูลข่าว','EN':'Edit News'};
+  var deleteNews = {'TH':'ลบข่าว','EN':'Delete'};
   /************************Dialog News**************************/
   var dialogAddnewsHeader1 = {'TH':'กรุณาเพิ่มรูปไม่เกิน 3 รูป','EN':'Add 1 to 3 images.'};
 

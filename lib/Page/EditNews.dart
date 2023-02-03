@@ -312,6 +312,21 @@ class _EditNewsState extends State<EditNews> {
                     ),
                     SizedBox(height: 15),
                     ElevatedButton(
+                      onPressed: ()  {
+                        setState(()   {
+                          selectedImageList.clear();
+                          /* Uint8List bytes = (await NetworkAssetBundle(Uri.parse(defaultImageUrl))
+                                    .load(defaultImageUrl))
+                                    .buffer
+                                    .asUint8List();
+                                selectedImageList.add(bytes); */
+                          print('You Clear image');
+                        });
+                      },
+                      child: Text('${word.clearimage['$lang']}'),
+                    ),
+                    SizedBox(height: 15),
+                    ElevatedButton(
                       onPressed: () async {
                         if(title.text.isEmpty || news_detail.text.isEmpty ){
                           dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);                      

@@ -46,7 +46,7 @@ class _NewsManagementState extends State<NewsManagement> {
   bool checkNotfoundData = true;
   int numTrueBar = 0, numFalseBar = 0 ,numTruePie = 0, numFalsePie = 0;
   double screenWidth, screenHeight;
-  Query news = FirebaseFirestore.instance.collection('News');
+  Query news = FirebaseFirestore.instance.collection('News').orderBy('id');
   TextEditingController searchBarController = TextEditingController();
 
   Widget build(BuildContext context) {
@@ -373,14 +373,14 @@ class _NewsManagementState extends State<NewsManagement> {
             children: [
               IconButton(
                 icon: Icon(Icons.edit),
-                tooltip: '${word.editCondo['$lang']} : ${document['title']}',
+                tooltip: '${word.editNews['$lang']} : ${document['title']}',
                 onPressed: (){
                   Navigator.push(context,  MaterialPageRoute(builder: (context) => EditNews(document.id, this.lang)));
                 },
               ),
               IconButton(
                 icon: Icon(Icons.delete),
-                tooltip: '${word.deleteCondo['$lang']} : ${document['title']}',
+                tooltip: '${word.deleteNews['$lang']} : ${document['title']}',
                 onPressed: (){
                   showDialog(
                     context: context,
