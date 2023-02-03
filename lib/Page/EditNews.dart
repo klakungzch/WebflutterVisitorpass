@@ -10,7 +10,7 @@ import 'package:visitorguard/Language/UrlImage.dart';
 import 'package:visitorguard/Language/Word.dart';
 import 'package:visitorguard/Model/condo_model.dart';
 import 'package:visitorguard/Page/CondoManagement.dart';
-
+import 'package:intl/intl.dart';
 import 'package:firebase_storage/firebase_storage.dart' as  firebase_storage;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:visitorguard/Page/Log.dart';
@@ -387,17 +387,25 @@ class _EditNewsState extends State<EditNews> {
                                           ),
                                           SizedBox(width: 10,),
                                           ElevatedButton(
+
                                             onPressed: () async {
+                                              QuerySnapshot query = await FirebaseFirestore.instance
+                                                  .collection("News")
+                                                  .where('title'.toLowerCase(), isEqualTo: title.text.toLowerCase())
+                                                  .get();
+                                              print(query.docs.isNotEmpty);
+
                                               if(title.text.isEmpty || news_detail.text.isEmpty || title.text == "" || title.text == " "){
                                                 dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);
+                                              }else if (query.docs.isNotEmpty ==true){
+                                                dialogCustom(context, '${word.dialogduplicatetitlenews['$lang']}', this.lang);
                                               }else if(selectedImageList == []  || selectedImageList.isEmpty){
                                                 print('id : ${this.id}');
                                                 var model;
                                                 final DateTime now = DateTime.now();
                                                 final prefs = await SharedPreferences.getInstance();
                                                 String username = prefs.getString("userlogin");
-                                                String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
-
+                                                final f = new DateFormat('dd/MM/yyyy H:mm a');
                                                 FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
                                                   await _uploadMultipleFiles(this.id);
                                                   var NewsModel2 = {
@@ -405,7 +413,7 @@ class _EditNewsState extends State<EditNews> {
                                                     "username": username,
                                                     "title" : title.text,
                                                     "detail" : news_detail.text,
-                                                    "datetime" : date,
+                                                    "datetime" : f.format(now),
                                                     "imageurl" : uriimage
 
                                                   };
@@ -423,8 +431,7 @@ class _EditNewsState extends State<EditNews> {
                                                 final DateTime now = DateTime.now();
                                                 final prefs = await SharedPreferences.getInstance();
                                                 String username = prefs.getString("userlogin");
-                                                String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
-
+                                                final f = new DateFormat('dd/MM/yyyy H:mm a');
 
                                                 FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
                                                   await _uploadMultipleFiles(this.id);
@@ -433,7 +440,7 @@ class _EditNewsState extends State<EditNews> {
                                                     "username": username,
                                                     "title" : title.text,
                                                     "detail" : news_detail.text,
-                                                    "datetime" : date,
+                                                    "datetime" : f.format(now),
                                                     "imageurl" : imageUrls
 
                                                   };

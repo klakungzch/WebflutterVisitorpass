@@ -131,7 +131,8 @@ class Word{
   var deleteNews = {'TH':'ลบข่าว','EN':'Delete'};
   /************************Dialog News**************************/
   var dialogAddnewsHeader1 = {'TH':'กรุณาเพิ่มรูปไม่เกิน 3 รูป','EN':'Add 1 to 3 images.'};
-
+  var dialogduplicatetitlenews = {'TH':'มีหัวข้อข่าวนี้อยู่แล้ว','EN':'title is already.'};
+  var dialogDeleteNewsHeader1 = {'TH':'ยืนยันการลบข้อมูลข่าว','EN':'Confirm the deletion of news data.'};
   /************************Choose News**************************/
   var chooseNewsHeader = {'TH':'เลือกข่าว','EN':'Choose News'};
 

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as  firebase_storage;
@@ -149,7 +149,7 @@ class _AddNewsState extends State<AddNews> {
     }
     return imageUrl;
   }
-  
+
 
   @override
   Widget build(BuildContext context) {
@@ -366,18 +366,26 @@ class _AddNewsState extends State<AddNews> {
                           SizedBox(height: 15),
                           ElevatedButton(
                             onPressed: () async {
+
+                              QuerySnapshot query = await FirebaseFirestore.instance
+                                  .collection("News")
+                                  .where('title'.toLowerCase(), isEqualTo: news_name.text.toLowerCase())
+                                  .get();
+                              print(query.docs.isNotEmpty);
+
                               if(news_name.text.isEmpty || news_detail.text.isEmpty || news_name.text == "" || news_name.text == " "){
                                 dialogCustom(context, '${word.dialogAdduserHeader1['$lang']}', this.lang);
                               }else if(selectedImageList == []  || selectedImageList.isEmpty){
                                 dialogCustom(context, '${word.dialogAddnewsHeader1['$lang']}', this.lang);
+                              }else if (query.docs.isNotEmpty ==true){
+                                dialogCustom(context, '${word.dialogduplicatetitlenews['$lang']}', this.lang);
                               }
                               else{
                                 var model;
                                 final DateTime now = DateTime.now();
                                 final prefs = await SharedPreferences.getInstance();
                                 String username = prefs.getString("userlogin");
-                                String date = now.day.toString()+"/"+now.month.toString()+"/"+now.year.toString()+" "+now.hour.toString()+":"+now.minute.toString();
-
+                                final f = new DateFormat('dd/MM/yyyy H:mm a');
                                 FirebaseFirestore.instance.collection("News").get().then((querySnapshot) async {
                                   int count = 1;
                                   int maxId = 0;
@@ -393,16 +401,20 @@ class _AddNewsState extends State<AddNews> {
                                   });
                                   print(count);
                                   int mid = maxId +1;
+
+
                                   await _uploadMultipleFiles(mid.toString());
                                   var NewsModel2 = {
                                     "id": (maxId+1),
                                     "username": username,
                                     "title" : news_name.text,
                                     "detail" : news_detail.text,
-                                    "datetime" : date,
+                                    "datetime" : f.format(now),
                                     "imageurl" : imageUrls
 
                                   };
+
+
                                   FirebaseFirestore.instance
                                       .collection("News")
                                       .doc((maxId+1).toString())

@@ -406,7 +406,7 @@ class _NewsManagementState extends State<NewsManagement> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
                                   child: Text(
-                                    '${word.dialogCondoHeader1['$lang']}',
+                                    '${word.dialogDeleteNewsHeader1['$lang']}',
                                     style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.bold, fontFamily: 'Prompt'),
                                     textAlign: TextAlign.center,
                                   ),
